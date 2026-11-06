@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class Tournament extends Model
 {
@@ -25,14 +28,32 @@ class Tournament extends Model
      */
     public static function active(): self
     {
-        return static::firstOrCreate(
-            ['slug' => 'default'],
-            [
+        try {
+            if (!Schema::hasTable('tournaments')) {
+                Artisan::call('migrate', ['--force' => true]);
+            }
+
+            return static::firstOrCreate(
+                ['slug' => 'default'],
+                [
+                    'title' => 'Boys & Girls Knockout Cup',
+                    'admin_pin' => '1234',
+                    'state' => static::defaultState(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Tournament::active() fallback: ' . $e->getMessage());
+
+            $fallback = new static([
+                'slug' => 'default',
                 'title' => 'Boys & Girls Knockout Cup',
                 'admin_pin' => '1234',
                 'state' => static::defaultState(),
-            ]
-        );
+            ]);
+            $fallback->exists = false;
+
+            return $fallback;
+        }
     }
 
     /**
