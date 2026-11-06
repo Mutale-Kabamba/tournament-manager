@@ -10,3 +10,4 @@ Route::prefix('tournament')->group(function () {
     Route::post('/change-pin', [TournamentController::class, 'changePin']);
     Route::post('/reset', [TournamentController::class, 'reset']);
 });
+

@@ -55,3 +55,4 @@ exec apache2-foreground' > /usr/local/bin/entrypoint.sh \
 EXPOSE 80
 
 CMD ["/usr/local/bin/entrypoint.sh"]
+
