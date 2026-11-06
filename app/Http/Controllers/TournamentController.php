@@ -21,7 +21,7 @@ class TournamentController extends Controller
         } catch (\Throwable $e) {
             Log::error('TournamentController index error: ' . $e->getMessage());
             $tournament = new Tournament([
-                'title' => 'Boys & Girls Knockout Cup',
+                'title' => 'Play it Forward — Tiyende Pamodzi Tournament',
                 'admin_pin' => '1234',
             ]);
             $state = Tournament::defaultState();
@@ -51,7 +51,7 @@ class TournamentController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => true,
-                'title' => 'Boys & Girls Knockout Cup',
+                'title' => 'Play it Forward — Tiyende Pamodzi Tournament',
                 'state' => Tournament::defaultState(),
                 'updated_at' => now()->toIso8601String(),
                 'timestamp' => time(),

@@ -14,9 +14,9 @@ class TournamentTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Tournament Manager');
-        $response->assertSee('Boys Division');
-        $response->assertSee('Girls Division');
+        $response->assertSee('Play it Forward');
+        $response->assertSee('Boys Tournament');
+        $response->assertSee('Girls Tournament');
     }
 
     public function test_tournament_api_returns_state(): void

@@ -2,33 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $tournament->title ?? 'Tournament Manager — Boys & Girls Divisions' }}</title>
+    <title>Play it Forward — Tiyende Pamodzi Tournament</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts: Inter & Chakra Petch for sports numbers -->
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Outfit (Premier League style headline) & Chakra Petch (Numbers) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Outfit', 'sans-serif'],
                         display: ['Chakra Petch', 'sans-serif'],
                     },
                     colors: {
-                        pitch: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                            950: '#022c22',
+                        pl: {
+                            purple: '#38003c',       // Iconic Premier League deep plum
+                            dark: '#240027',         // Deeper plum shadow
+                            night: '#150017',        // Midnight base
+                            neon: '#00ff87',         // Premier League electric mint
+                            cyan: '#04f5ff',         // Electric cyan
+                            pink: '#ff2882',         // Premier League neon pink
+                            card: '#ffffff',
+                            surface: '#f5f3f7',
+                            border: '#e4dbe7',
                         }
                     }
                 }
@@ -37,12 +40,16 @@
     </script>
     <style>
         body {
-            background-color: #f1f5f9;
-            color: #0f172a;
+            background-color: #f6f4f8;
+            color: #1a001f;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        .pitch-gradient {
-            background: linear-gradient(135deg, #022c22 0%, #064e3b 55%, #0f172a 100%);
+        .pl-gradient {
+            background: linear-gradient(135deg, #38003c 0%, #200024 60%, #150017 100%);
+        }
+        .pl-neon-gradient {
+            background: linear-gradient(135deg, #00ff87 0%, #04f5ff 100%);
         }
         .score-input::-webkit-inner-spin-button,
         .score-input::-webkit-outer-spin-button {
@@ -74,557 +81,521 @@
             }
         }
         @keyframes pulse-live {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
         }
         .live-dot {
-            animation: pulse-live 1.5s infinite;
+            animation: pulse-live 1.2s infinite;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+<body class="min-h-screen flex flex-col selection:bg-pl-neon selection:text-pl-purple">
 
-    <!-- Top Header -->
-    <header class="pitch-gradient text-white shadow-xl sticky top-0 z-30 border-b border-emerald-800/60">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shadow-inner shrink-0">
-                        <i class="fa-solid fa-trophy text-amber-400 text-xl sm:text-2xl"></i>
+    <!-- Top Broadcast Header -->
+    <header class="pl-gradient text-white shadow-2xl sticky top-0 z-30 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
+            <div class="flex items-center justify-between gap-2">
+                <!-- Branding -->
+                <div class="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shadow-inner shrink-0 relative overflow-hidden group">
+                        <div class="absolute inset-0 pl-neon-gradient opacity-20"></div>
+                        <i class="fa-solid fa-trophy text-amber-300 text-lg sm:text-xl drop-shadow-md"></i>
                     </div>
                     <div class="min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="text-[10px] sm:text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/20">Official Cup</span>
-                            <!-- Public vs Admin Mode Status Pill -->
-                            <span id="mode-status-badge" class="text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-900/70 text-slate-200 border border-white/15 flex items-center gap-1.5">
-                                <i class="fa-solid fa-eye text-emerald-400"></i> Public Live View
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[9px] sm:text-[10px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-pl-pink text-white shadow-xs">
+                                Matchday
                             </span>
-                            <!-- Server Sync Status Badge -->
-                            <span id="sync-status-badge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Server Live
+                            <span id="mode-status-badge" class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-black/40 text-slate-200 border border-white/15 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-pl-neon live-dot"></span> Public Live
+                            </span>
+                            <span id="sync-status-badge" class="hidden sm:flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-emerald-300 border border-emerald-400/30 items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-pl-neon"></span> Live Sync
                             </span>
                         </div>
-                        <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight mt-0.5 truncate" id="tournament-title-display">
-                            {{ $tournament->title ?? 'Boys & Girls Knockout Cup' }}
+                        <h1 class="text-base sm:text-xl md:text-2xl font-black tracking-tight mt-0.5 truncate leading-tight text-white flex items-center gap-1.5">
+                            Play it Forward
+                            <span class="text-xs sm:text-sm font-semibold text-pl-neon hidden md:inline">• Tiyende Pamodzi</span>
                         </h1>
+                        <p class="text-[10px] sm:text-xs text-purple-200/80 font-medium truncate md:hidden">
+                            Tiyende Pamodzi Tournament
+                        </p>
                     </div>
                 </div>
 
-                <!-- Quick Stats & Action Buttons -->
-                <div class="flex flex-wrap items-center gap-2 no-print">
-                    <div class="hidden md:flex bg-slate-900/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs items-center gap-3">
-                        <div>
-                            <span class="text-slate-400 block">Progress</span>
-                            <span id="header-progress-text" class="font-display font-bold text-sm text-emerald-400">0 / 22</span>
-                        </div>
-                        <div class="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div id="header-progress-bar" class="bg-emerald-400 h-full transition-all duration-300" style="width: 0%"></div>
+                <!-- Action Controls -->
+                <div class="flex items-center gap-1.5 sm:gap-2 no-print shrink-0">
+                    <!-- Progress Pill (hidden on tiny screens) -->
+                    <div class="hidden lg:flex bg-black/30 border border-white/10 rounded-xl px-2.5 py-1 text-xs items-center gap-2">
+                        <span id="header-progress-text" class="font-display font-bold text-pl-neon text-xs">0 / 22</span>
+                        <div class="w-12 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div id="header-progress-bar" class="bg-pl-neon h-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-medium transition flex items-center gap-1.5 border border-white/10">
-                        <i class="fa-solid fa-print text-emerald-300"></i>
+                    <button onclick="window.print()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/15 flex items-center gap-1.5" title="Print Tournament">
+                        <i class="fa-solid fa-print text-pl-neon text-sm sm:text-xs"></i>
                         <span class="hidden sm:inline">Print</span>
                     </button>
 
-                    <!-- Admin Controls (Only visible when Admin is unlocked) -->
-                    <button onclick="openChangePinModal()" class="admin-only px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 border border-amber-400/30" title="Change Admin PIN">
+                    <!-- Admin Unlocked Buttons -->
+                    <button onclick="openChangePinModal()" class="admin-only p-2 sm:px-3 sm:py-1.5 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 text-xs font-bold transition border border-amber-400/30 flex items-center gap-1.5" title="Change PIN">
                         <i class="fa-solid fa-key"></i>
                         <span class="hidden sm:inline">PIN</span>
                     </button>
 
-                    <button onclick="openConfirmModal('reset')" class="admin-only px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 border border-rose-400/20">
+                    <button onclick="openConfirmModal('reset')" class="admin-only p-2 sm:px-3 sm:py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 text-xs font-bold transition border border-rose-400/30 flex items-center gap-1.5" title="Reset All">
                         <i class="fa-solid fa-rotate-left"></i>
                         <span class="hidden sm:inline">Reset</span>
                     </button>
 
-                    <!-- Public Button: Unlock Admin -->
-                    <button onclick="openPinModal()" class="public-only px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs sm:text-sm font-extrabold transition flex items-center gap-1.5 shadow-lg shadow-amber-500/10">
-                        <i class="fa-solid fa-lock"></i>
-                        <span>Admin Login</span>
+                    <!-- Lock / Login Pill -->
+                    <button onclick="openPinModal()" class="public-only px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl pl-neon-gradient text-pl-purple font-extrabold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-md shadow-pl-neon/20 hover:brightness-110 active:scale-95">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span>Admin</span>
                     </button>
 
-                    <!-- Admin Button: Lock / Exit to Public View -->
-                    <button onclick="exitAdminMode()" class="admin-only px-3.5 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 text-xs sm:text-sm font-extrabold transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-lock-open"></i>
+                    <button onclick="exitAdminMode()" class="admin-only px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-pl-pink text-white font-extrabold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-md shadow-pl-pink/20 hover:brightness-110 active:scale-95">
+                        <i class="fa-solid fa-lock-open text-xs"></i>
                         <span>Lock</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Navigation Tabs -->
-            <nav class="flex space-x-1 sm:space-x-2 mt-4 overflow-x-auto pb-1 no-print scrollbar-none" aria-label="Tabs">
-                <button onclick="switchTab('boys')" id="tab-btn-boys" class="tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 shrink-0">
-                    <i class="fa-solid fa-futbol"></i>
-                    <span>Boys Division</span>
-                    <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-950/20 font-bold">2 Grp</span>
+            <!-- Premier League Tabs Navigation -->
+            <nav class="flex space-x-1.5 sm:space-x-2 mt-2.5 sm:mt-3 overflow-x-auto pb-1 no-print scrollbar-none" aria-label="Tabs">
+                <button onclick="switchTab('boys')" id="tab-btn-boys" class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-extrabold text-xs sm:text-sm transition whitespace-nowrap bg-pl-neon text-pl-purple shadow-md shadow-pl-neon/20 shrink-0">
+                    <i class="fa-solid fa-futbol text-xs"></i>
+                    <span>Boys</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-pl-purple/20 font-black">10 Teams</span>
                 </button>
-                <button onclick="switchTab('girls')" id="tab-btn-girls" class="tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap text-emerald-100 hover:bg-white/10 shrink-0">
-                    <i class="fa-solid fa-medal"></i>
-                    <span>Girls Division</span>
-                    <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-white/10 font-bold">Top 4</span>
+                <button onclick="switchTab('girls')" id="tab-btn-girls" class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-xs sm:text-sm transition whitespace-nowrap text-purple-200 hover:bg-white/10 shrink-0">
+                    <i class="fa-solid fa-crown text-xs"></i>
+                    <span>Girls</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-white/10 font-black">6 Teams</span>
                 </button>
-                <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap text-emerald-100 hover:bg-white/10 shrink-0">
-                    <i class="fa-solid fa-calendar-day"></i>
+                <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-xs sm:text-sm transition whitespace-nowrap text-purple-200 hover:bg-white/10 shrink-0">
+                    <i class="fa-solid fa-calendar-day text-xs"></i>
                     <span>Pitch Schedule</span>
                 </button>
-                <button onclick="switchTab('teams')" id="tab-btn-teams" class="admin-only tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap text-emerald-100 hover:bg-white/10 shrink-0">
-                    <i class="fa-solid fa-users-gear"></i>
-                    <span>Teams & Draw</span>
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold">ADMIN</span>
+                <button onclick="switchTab('teams')" id="tab-btn-teams" class="admin-only tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-xs sm:text-sm transition whitespace-nowrap text-purple-200 hover:bg-white/10 shrink-0">
+                    <i class="fa-solid fa-sliders text-xs"></i>
+                    <span>Draw & Teams</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black">ADMIN</span>
                 </button>
             </nav>
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
 
-        <!-- Public vs Admin Mode Info Bar -->
-        <div class="public-only bg-slate-900 text-slate-200 rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs border border-slate-800 shadow-xs no-print">
-            <div class="flex items-center gap-2.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 live-dot shrink-0"></span>
-                <span><strong>Public Live View:</strong> Real-time read-only standings, fixtures, and bracket updates powered by Laravel.</span>
+        <!-- Mobile Quick Info Strips (Clean & Minimal) -->
+        <div class="public-only bg-white border border-pl-border rounded-xl px-3 py-2 flex items-center justify-between text-xs shadow-2xs no-print">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2 h-2 rounded-full bg-pl-neon live-dot shrink-0"></span>
+                <span class="text-slate-700 font-semibold truncate text-[11px] sm:text-xs">Live Tournament Standings & Results</span>
             </div>
-            <button onclick="openPinModal()" class="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 self-start sm:self-auto">
-                <i class="fa-solid fa-key"></i> Enter Admin PIN
+            <button onclick="openPinModal()" class="text-pl-purple hover:text-pl-pink font-extrabold flex items-center gap-1 text-[11px] sm:text-xs shrink-0 ml-2">
+                <i class="fa-solid fa-key text-[10px]"></i> Admin PIN
             </button>
         </div>
 
-        <div class="admin-only bg-amber-50 border border-amber-300 text-amber-950 rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-xs no-print">
-            <div class="flex items-center gap-2.5">
-                <span class="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black uppercase tracking-wider text-[10px]">Admin Active</span>
-                <span><strong>Score Entry Unlocked:</strong> Scores save automatically to server database and reflect live on all viewers' screens.</span>
+        <div class="admin-only bg-amber-500/10 border border-amber-300 text-amber-950 rounded-xl px-3 py-2 flex items-center justify-between text-xs shadow-2xs no-print">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px] uppercase tracking-wider">Admin</span>
+                <span class="font-bold text-[11px] sm:text-xs truncate">Score entry active. Auto-syncing to cloud.</span>
             </div>
-            <div class="flex items-center gap-3 self-start sm:self-auto">
-                <button onclick="openChangePinModal()" class="text-amber-800 hover:text-amber-950 font-bold underline">Change PIN</button>
-                <button onclick="exitAdminMode()" class="px-2.5 py-1 rounded-lg bg-amber-900 text-white hover:bg-slate-900 font-bold transition">Lock View</button>
-            </div>
+            <button onclick="exitAdminMode()" class="text-amber-900 hover:text-slate-900 font-black text-[11px] shrink-0 ml-2">
+                Lock <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
+            </button>
         </div>
 
-        <!-- Champions Banner (Dynamically shown when a Final is completed) -->
+        <!-- Champions Banner -->
         <div id="champions-banner" class="hidden"></div>
 
         <!-- ==================== TAB 1: BOYS DIVISION ==================== -->
-        <section id="tab-boys" class="space-y-6 sm:space-y-8">
-            <!-- Boys Format Summary Banner -->
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start sm:items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 font-bold text-lg border border-blue-200">
+        <section id="tab-boys" class="space-y-4 sm:space-y-6">
+            <!-- Compact Format Strip -->
+            <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs border border-pl-border flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-pl-purple text-pl-neon flex items-center justify-center font-bold text-sm shrink-0">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="text-base sm:text-lg font-bold text-slate-900">Boys Tournament — 10 Teams</h2>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">2 Groups of 5</span>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">2 Games Each</span>
+                    <div class="min-w-0">
+                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Boys Tournament</h2>
+                        <div class="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-xs font-semibold text-slate-500 mt-0.5">
+                            <span class="px-2 py-0.2 rounded bg-purple-100 text-pl-purple font-bold">10 Teams</span>
+                            <span>•</span>
+                            <span class="px-2 py-0.2 rounded bg-blue-100 text-blue-800 font-bold">2 Groups of 5</span>
+                            <span>•</span>
+                            <span class="px-2 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">2 Games / Team</span>
+                            <span>•</span>
+                            <span class="text-pl-purple font-extrabold">Top 2 to SF</span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-                            Each team plays <strong>2 group games</strong>. The <strong>Top 2 from Group 1</strong> and <strong>Top 2 from Group 2</strong> advance to Semi-Finals.
-                        </p>
                     </div>
                 </div>
-                <div class="admin-only flex flex-wrap items-center gap-2 no-print shrink-0">
-                    <button onclick="openAddMatchModal('boys')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus text-blue-600"></i> Add Match
+                <div class="admin-only flex items-center gap-1.5 no-print shrink-0">
+                    <button onclick="openAddMatchModal('boys')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-plus text-pl-purple text-[10px]"></i> Match
                     </button>
-                    <button onclick="shuffleAndRedraw('boys')" class="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition flex items-center gap-1.5 border border-blue-200">
-                        <i class="fa-solid fa-shuffle"></i> Redraw Draw
+                    <button onclick="shuffleAndRedraw('boys')" class="px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-pl-purple text-xs font-bold transition border border-purple-200 flex items-center gap-1">
+                        <i class="fa-solid fa-shuffle text-[10px]"></i> Redraw
                     </button>
                 </div>
             </div>
 
-            <!-- Boys Group 1 & Group 2 Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Group 1 & 2 Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Group 1 Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col print-break">
-                    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3.5 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                            <h3 class="font-bold tracking-wide text-sm sm:text-base">BOYS GROUP 1</h3>
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden flex flex-col print-break">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pl-neon"></span>
+                            <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Boys Group 1</h3>
                         </div>
-                        <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full font-medium">
+                        <span class="text-[10px] bg-white/10 text-pl-neon border border-pl-neon/30 px-2 py-0.5 rounded font-extrabold uppercase">
                             Top 2 Qualify
                         </span>
                     </div>
 
-                    <!-- Standings Table Group 1 -->
+                    <!-- Standings Table -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                    <th class="py-2.5 pl-3 sm:pl-4 pr-1 w-7">#</th>
-                                    <th class="py-2.5 px-2">Team</th>
-                                    <th class="py-2.5 px-1.5 text-center">P</th>
-                                    <th class="py-2.5 px-1.5 text-center">W</th>
-                                    <th class="py-2.5 px-1.5 text-center">D</th>
-                                    <th class="py-2.5 px-1.5 text-center">L</th>
-                                    <th class="py-2.5 px-1.5 text-center hidden sm:table-cell">GF:GA</th>
-                                    <th class="py-2.5 px-1.5 text-center">GD</th>
-                                    <th class="py-2.5 pl-1.5 pr-3 sm:pr-4 text-center font-extrabold text-slate-800">PTS</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                                    <th class="py-2 pl-3 pr-1 w-6">#</th>
+                                    <th class="py-2 px-2">Team</th>
+                                    <th class="py-2 px-1 text-center w-7">P</th>
+                                    <th class="py-2 px-1 text-center w-7">W</th>
+                                    <th class="py-2 px-1 text-center w-7">D</th>
+                                    <th class="py-2 px-1 text-center w-7">L</th>
+                                    <th class="py-2 px-1 text-center w-10 hidden sm:table-cell">GF:GA</th>
+                                    <th class="py-2 px-1 text-center w-8">GD</th>
+                                    <th class="py-2 pr-3 pl-1 text-center w-9 font-black text-pl-purple">PTS</th>
                                 </tr>
                             </thead>
-                            <tbody id="boys-g1-standings" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+                            <tbody id="boys-g1-standings" class="divide-y divide-slate-100 font-medium"></tbody>
                         </table>
                     </div>
 
-                    <!-- Group 1 Fixtures -->
-                    <div class="p-3 sm:p-4 bg-slate-50/70 border-t border-slate-200 flex-1 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                    <i class="fa-regular fa-calendar-check text-emerald-600"></i> Group 1 Fixtures
-                                </h4>
-                                <span id="boys-g1-games-badge" class="text-[10px] sm:text-[11px] font-medium text-slate-500"></span>
-                            </div>
-                            <div id="boys-g1-fixtures" class="space-y-2"></div>
+                    <!-- Fixtures -->
+                    <div class="p-2.5 sm:p-3.5 bg-slate-50/80 border-t border-slate-200 flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Fixtures</span>
+                            <span id="boys-g1-games-badge" class="text-[10px] font-bold text-slate-400"></span>
                         </div>
+                        <div id="boys-g1-fixtures" class="space-y-1.5"></div>
                     </div>
                 </div>
 
                 <!-- Group 2 Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col print-break">
-                    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3.5 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-blue-400"></span>
-                            <h3 class="font-bold tracking-wide text-sm sm:text-base">BOYS GROUP 2</h3>
+                <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden flex flex-col print-break">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pl-cyan"></span>
+                            <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Boys Group 2</h3>
                         </div>
-                        <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full font-medium">
+                        <span class="text-[10px] bg-white/10 text-pl-cyan border border-pl-cyan/30 px-2 py-0.5 rounded font-extrabold uppercase">
                             Top 2 Qualify
                         </span>
                     </div>
 
-                    <!-- Standings Table Group 2 -->
+                    <!-- Standings Table -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                    <th class="py-2.5 pl-3 sm:pl-4 pr-1 w-7">#</th>
-                                    <th class="py-2.5 px-2">Team</th>
-                                    <th class="py-2.5 px-1.5 text-center">P</th>
-                                    <th class="py-2.5 px-1.5 text-center">W</th>
-                                    <th class="py-2.5 px-1.5 text-center">D</th>
-                                    <th class="py-2.5 px-1.5 text-center">L</th>
-                                    <th class="py-2.5 px-1.5 text-center hidden sm:table-cell">GF:GA</th>
-                                    <th class="py-2.5 px-1.5 text-center">GD</th>
-                                    <th class="py-2.5 pl-1.5 pr-3 sm:pr-4 text-center font-extrabold text-slate-800">PTS</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                                    <th class="py-2 pl-3 pr-1 w-6">#</th>
+                                    <th class="py-2 px-2">Team</th>
+                                    <th class="py-2 px-1 text-center w-7">P</th>
+                                    <th class="py-2 px-1 text-center w-7">W</th>
+                                    <th class="py-2 px-1 text-center w-7">D</th>
+                                    <th class="py-2 px-1 text-center w-7">L</th>
+                                    <th class="py-2 px-1 text-center w-10 hidden sm:table-cell">GF:GA</th>
+                                    <th class="py-2 px-1 text-center w-8">GD</th>
+                                    <th class="py-2 pr-3 pl-1 text-center w-9 font-black text-pl-purple">PTS</th>
                                 </tr>
                             </thead>
-                            <tbody id="boys-g2-standings" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+                            <tbody id="boys-g2-standings" class="divide-y divide-slate-100 font-medium"></tbody>
                         </table>
                     </div>
 
-                    <!-- Group 2 Fixtures -->
-                    <div class="p-3 sm:p-4 bg-slate-50/70 border-t border-slate-200 flex-1 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                    <i class="fa-regular fa-calendar-check text-blue-600"></i> Group 2 Fixtures
-                                </h4>
-                                <span id="boys-g2-games-badge" class="text-[10px] sm:text-[11px] font-medium text-slate-500"></span>
-                            </div>
-                            <div id="boys-g2-fixtures" class="space-y-2"></div>
+                    <!-- Fixtures -->
+                    <div class="p-2.5 sm:p-3.5 bg-slate-50/80 border-t border-slate-200 flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">Fixtures</span>
+                            <span id="boys-g2-games-badge" class="text-[10px] font-bold text-slate-400"></span>
                         </div>
+                        <div id="boys-g2-fixtures" class="space-y-1.5"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Boys Knockout Stage -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden print-break">
-                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
-                            <i class="fa-solid fa-trophy"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm sm:text-base tracking-wide">BOYS KNOCKOUT STAGE</h3>
-                            <p class="text-[11px] sm:text-xs text-slate-300">Semi-Finals & Championship Final</p>
-                        </div>
+            <!-- Boys Knockout Bracket -->
+            <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden print-break">
+                <div class="pl-gradient text-white px-3.5 py-3 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2 border-b border-white/10">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
+                        <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Boys Knockout Stage</h3>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 no-print">
-                        <button onclick="seedKnockoutFromStandings('boys')" class="admin-only text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Seed Top 2
+                    <div class="flex items-center gap-1.5 no-print">
+                        <button onclick="seedKnockoutFromStandings('boys')" class="admin-only text-[11px] font-extrabold text-pl-purple bg-pl-neon hover:brightness-110 px-2.5 py-1 rounded-lg transition shadow-xs flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Seed Top 2
                         </button>
-                        <button onclick="clearKnockoutSeeds('boys')" class="admin-only text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-rotate-left"></i> Clear
+                        <button onclick="clearKnockoutSeeds('boys')" class="admin-only text-[11px] font-semibold text-slate-200 bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition">
+                            Clear
                         </button>
-                        <span class="public-only text-[11px] text-slate-300 bg-white/10 border border-white/15 px-2.5 py-1 rounded-lg">
-                            <i class="fa-solid fa-lock mr-1 text-amber-400"></i> Admin bracket
-                        </span>
                     </div>
                 </div>
-
-                <div id="boys-knockout-container" class="p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 bg-slate-50/50"></div>
+                <div id="boys-knockout-container" class="p-2.5 sm:p-4 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 bg-slate-50/60"></div>
             </div>
         </section>
 
         <!-- ==================== TAB 2: GIRLS DIVISION ==================== -->
-        <section id="tab-girls" class="hidden space-y-6 sm:space-y-8">
-            <!-- Girls Format Summary Banner -->
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-start sm:items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 font-bold text-lg border border-purple-200">
+        <section id="tab-girls" class="hidden space-y-4 sm:space-y-6">
+            <!-- Compact Format Strip -->
+            <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs border border-pl-border flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-purple-100 text-pl-purple flex items-center justify-center font-bold text-sm shrink-0">
                         <i class="fa-solid fa-crown"></i>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="text-base sm:text-lg font-bold text-slate-900">Girls Tournament — 6 Teams</h2>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">Single League</span>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">2 Games • Top 4 to KO</span>
+                    <div class="min-w-0">
+                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Girls Tournament</h2>
+                        <div class="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-xs font-semibold text-slate-500 mt-0.5">
+                            <span class="px-2 py-0.2 rounded bg-purple-100 text-pl-purple font-bold">6 Teams</span>
+                            <span>•</span>
+                            <span class="px-2 py-0.2 rounded bg-purple-50 text-purple-700 font-bold">Single League</span>
+                            <span>•</span>
+                            <span class="px-2 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">2 Games / Team</span>
+                            <span>•</span>
+                            <span class="text-pl-purple font-extrabold">Top 4 to SF</span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-                            Each team plays <strong>2 league games</strong>. The <strong>Top 4 teams</strong> advance to Semi-Finals (1st vs 4th, 2nd vs 3rd).
-                        </p>
                     </div>
                 </div>
-                <div class="admin-only flex flex-wrap items-center gap-2 no-print shrink-0">
-                    <button onclick="openAddMatchModal('girls')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus text-purple-600"></i> Add Match
+                <div class="admin-only flex items-center gap-1.5 no-print shrink-0">
+                    <button onclick="openAddMatchModal('girls')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-plus text-pl-purple text-[10px]"></i> Match
                     </button>
-                    <button onclick="shuffleAndRedraw('girls')" class="px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold transition flex items-center gap-1.5 border border-purple-200">
-                        <i class="fa-solid fa-shuffle"></i> Redraw Draw
+                    <button onclick="shuffleAndRedraw('girls')" class="px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-pl-purple text-xs font-bold transition border border-purple-200 flex items-center gap-1">
+                        <i class="fa-solid fa-shuffle text-[10px]"></i> Redraw
                     </button>
                 </div>
             </div>
 
-            <!-- Girls Standings & Fixtures Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Girls League Table (7 cols) -->
-                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col print-break">
-                    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3.5 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-3 h-3 rounded-full bg-purple-400"></span>
-                            <h3 class="font-bold tracking-wide text-sm sm:text-base">GIRLS STANDINGS</h3>
+            <!-- Standings & Fixtures Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                <!-- Standings Table -->
+                <div class="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden flex flex-col print-break">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol text-pl-neon text-xs"></i>
+                            <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Girls Standings</h3>
                         </div>
-                        <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full font-medium">
-                            Top 4 Qualify
+                        <span class="text-[10px] bg-white/10 text-pl-neon border border-pl-neon/30 px-2 py-0.5 rounded font-extrabold uppercase">
+                            Top 4 to Semi-Finals
                         </span>
                     </div>
 
                     <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse text-xs">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                                    <th class="py-3 pl-3 sm:pl-4 pr-1 w-7">#</th>
-                                    <th class="py-3 px-2">Team</th>
-                                    <th class="py-3 px-1.5 text-center">P</th>
-                                    <th class="py-3 px-1.5 text-center">W</th>
-                                    <th class="py-3 px-1.5 text-center">D</th>
-                                    <th class="py-3 px-1.5 text-center">L</th>
-                                    <th class="py-3 px-1.5 text-center hidden sm:table-cell">GF:GA</th>
-                                    <th class="py-3 px-1.5 text-center">GD</th>
-                                    <th class="py-3 pl-1.5 pr-3 sm:pr-4 text-center font-extrabold text-slate-800">PTS</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                                    <th class="py-2 pl-3 pr-1 w-6">#</th>
+                                    <th class="py-2 px-2">Team</th>
+                                    <th class="py-2 px-1 text-center w-7">P</th>
+                                    <th class="py-2 px-1 text-center w-7">W</th>
+                                    <th class="py-2 px-1 text-center w-7">D</th>
+                                    <th class="py-2 px-1 text-center w-7">L</th>
+                                    <th class="py-2 px-1 text-center w-10 hidden sm:table-cell">GF:GA</th>
+                                    <th class="py-2 px-1 text-center w-8">GD</th>
+                                    <th class="py-2 pr-3 pl-1 text-center w-9 font-black text-pl-purple">PTS</th>
                                 </tr>
                             </thead>
-                            <tbody id="girls-standings" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+                            <tbody id="girls-standings" class="divide-y divide-slate-100 font-medium"></tbody>
                         </table>
-                    </div>
-
-                    <div class="px-4 py-3 bg-emerald-50/70 border-t border-emerald-100 flex items-center justify-between text-[11px] sm:text-xs text-emerald-900">
-                        <span class="flex items-center gap-2 font-medium">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shrink-0"></span>
-                            Positions 1–4 advance to Knockouts (SF1: 1v4 • SF2: 2v3)
-                        </span>
                     </div>
                 </div>
 
-                <!-- Girls 6 League Fixtures (5 cols) -->
-                <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col print-break">
-                    <div class="bg-slate-900 text-white px-4 sm:px-5 py-3.5 flex items-center justify-between">
+                <!-- Fixtures -->
+                <div class="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden flex flex-col print-break">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between border-b border-white/10">
                         <div class="flex items-center gap-2">
-                            <i class="fa-regular fa-futbol text-purple-400"></i>
-                            <h3 class="font-bold tracking-wide text-sm sm:text-base">GIRLS FIXTURES</h3>
+                            <i class="fa-regular fa-futbol text-pl-cyan text-xs"></i>
+                            <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Girls Fixtures</h3>
                         </div>
-                        <span id="girls-games-badge" class="text-[11px] text-slate-300 font-medium">2 Games / Team</span>
+                        <span id="girls-games-badge" class="text-[10px] text-purple-200 font-bold"></span>
                     </div>
-                    <div class="p-3 sm:p-4 bg-slate-50/70 flex-1 space-y-2" id="girls-fixtures"></div>
+                    <div class="p-2.5 sm:p-3.5 bg-slate-50/80 flex-1 space-y-1.5" id="girls-fixtures"></div>
                 </div>
             </div>
 
-            <!-- Girls Knockout Stage -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden print-break">
-                <div class="bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white px-4 sm:px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300 shrink-0">
-                            <i class="fa-solid fa-trophy"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm sm:text-base tracking-wide">GIRLS KNOCKOUT STAGE (TOP 4)</h3>
-                            <p class="text-[11px] sm:text-xs text-slate-300">Semi-Finals & Grand Final</p>
-                        </div>
+            <!-- Girls Knockout Bracket -->
+            <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-pl-border overflow-hidden print-break">
+                <div class="pl-gradient text-white px-3.5 py-3 sm:px-5 sm:py-3.5 flex flex-wrap items-center justify-between gap-2 border-b border-white/10">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-300 text-sm"></i>
+                        <h3 class="font-black text-xs sm:text-sm tracking-wider uppercase">Girls Knockout (Top 4)</h3>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 no-print">
-                        <button onclick="seedKnockoutFromStandings('girls')" class="admin-only text-xs font-bold text-slate-950 bg-purple-300 hover:bg-purple-200 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Seed Top 4
+                    <div class="flex items-center gap-1.5 no-print">
+                        <button onclick="seedKnockoutFromStandings('girls')" class="admin-only text-[11px] font-extrabold text-pl-purple bg-pl-neon hover:brightness-110 px-2.5 py-1 rounded-lg transition shadow-xs flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Seed Top 4
                         </button>
-                        <button onclick="clearKnockoutSeeds('girls')" class="admin-only text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-rotate-left"></i> Clear
+                        <button onclick="clearKnockoutSeeds('girls')" class="admin-only text-[11px] font-semibold text-slate-200 bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition">
+                            Clear
                         </button>
-                        <span class="public-only text-[11px] text-purple-200 bg-purple-500/20 border border-purple-400/30 px-2.5 py-1 rounded-lg">
-                            <i class="fa-solid fa-lock mr-1 text-amber-400"></i> Admin bracket
-                        </span>
                     </div>
                 </div>
-
-                <div id="girls-knockout-container" class="p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 bg-slate-50/50"></div>
+                <div id="girls-knockout-container" class="p-2.5 sm:p-4 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 bg-slate-50/60"></div>
             </div>
         </section>
 
         <!-- ==================== TAB 3: MASTER PITCH SCHEDULE ==================== -->
-        <section id="tab-schedule" class="hidden space-y-6">
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section id="tab-schedule" class="hidden space-y-4">
+            <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs border border-pl-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-clipboard-list text-emerald-600"></i>
-                        Master Pitch Schedule & Timeline
+                    <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-pl-purple"></i>
+                        Pitch Match Schedule
                     </h2>
-                    <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
-                        Chronological pitch sequence for all Boys & Girls matches. Download as PDF or print.
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                        Chronological sequence for all matches
                     </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2.5 no-print">
-                    <select id="schedule-filter-division" onchange="renderMasterSchedule()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-700">
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <select id="schedule-filter-division" onchange="renderMasterSchedule()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 text-slate-700">
                         <option value="all">All Divisions</option>
-                        <option value="boys">Boys Division</option>
-                        <option value="girls">Girls Division</option>
+                        <option value="boys">Boys</option>
+                        <option value="girls">Girls</option>
                     </select>
-                    <select id="schedule-filter-status" onchange="renderMasterSchedule()" class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 text-slate-700">
+                    <select id="schedule-filter-status" onchange="renderMasterSchedule()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 text-slate-700">
                         <option value="all">All Statuses</option>
                         <option value="upcoming">Upcoming</option>
-                        <option value="live">Live Now</option>
+                        <option value="live">Live</option>
                         <option value="completed">Completed</option>
                     </select>
-                    <button onclick="downloadPdfSchedule()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-pdf"></i> Download PDF
+                    <button onclick="downloadPdfSchedule()" class="px-3 py-1.5 rounded-lg pl-neon-gradient text-pl-purple text-xs font-extrabold transition shadow-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf"></i> PDF
                     </button>
                 </div>
             </div>
 
-            <!-- PDF printable container -->
-            <div id="master-schedule-pdf-area" class="space-y-4">
-                <div class="hidden print:block mb-4 text-center">
-                    <h1 class="text-2xl font-extrabold">Official Tournament Master Pitch Schedule</h1>
-                    <p class="text-xs text-slate-500">Boys & Girls Knockout Cup • Generated from Tournament Manager</p>
+            <div id="master-schedule-pdf-area" class="space-y-3">
+                <div class="hidden print:block mb-3 text-center">
+                    <h1 class="text-xl font-black">Play it Forward — Tiyende Pamodzi Tournament</h1>
+                    <p class="text-xs text-slate-500">Official Master Pitch Schedule</p>
                 </div>
-                <div id="master-schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="master-schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
         </section>
 
         <!-- ==================== TAB 4: TEAMS & DRAW MANAGER ==================== -->
-        <section id="tab-teams" class="hidden space-y-6 no-print">
-            <div class="bg-emerald-950 text-white rounded-2xl p-4 sm:p-5 shadow-md border border-emerald-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div class="space-y-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-400 text-slate-950">Team Roster</span>
-                        <h2 class="text-base sm:text-lg font-bold">Group Draw & Team Names</h2>
-                    </div>
-                    <p class="text-xs sm:text-sm text-emerald-200/90">
-                        Rename teams, switch Boys between Group 1 & Group 2, or reshuffle fixtures instantly.
+        <section id="tab-teams" class="hidden space-y-4 no-print">
+            <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-2xs border border-pl-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-pl-purple"></i>
+                        Team Rosters & Group Draw
+                    </h2>
+                    <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                        Rename teams, swap groups, or redraw fixtures
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="clearAllScoresOnly()" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition border border-white/15">
-                        <i class="fa-solid fa-eraser mr-1.5"></i> Clear All Scores
+                    <button onclick="clearAllScoresOnly()" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-bold transition border border-rose-200">
+                        <i class="fa-solid fa-eraser mr-1"></i> Clear Scores
+                    </button>
+                    <button onclick="randomizeBoysGroupsEntirely()" class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-800 hover:bg-blue-100 text-xs font-bold transition border border-blue-200">
+                        <i class="fa-solid fa-dice mr-1"></i> Reshuffle Boys
+                    </button>
+                    <button onclick="shuffleAndRedraw('girls')" class="px-3 py-1.5 rounded-lg bg-purple-50 text-pl-purple hover:bg-purple-100 text-xs font-bold transition border border-purple-200">
+                        <i class="fa-solid fa-dice mr-1"></i> Reshuffle Girls
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Boys Group 1 Editor -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-                        <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                            Boys Group 1 (5 Teams)
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <!-- Boys G1 -->
+                <div class="bg-white rounded-xl shadow-2xs border border-pl-border overflow-hidden">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 flex items-center justify-between">
+                        <h3 class="font-extrabold text-xs flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-pl-neon"></span> Boys G1
                         </h3>
-                        <span class="text-[11px] text-slate-400">Swap to G2</span>
+                        <span class="text-[10px] text-purple-200">5 Teams</span>
                     </div>
-                    <div id="editor-boys-g1" class="p-3 sm:p-4 space-y-2.5"></div>
+                    <div id="editor-boys-g1" class="p-3 space-y-2"></div>
                 </div>
 
-                <!-- Boys Group 2 Editor -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-                        <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-                            Boys Group 2 (5 Teams)
+                <!-- Boys G2 -->
+                <div class="bg-white rounded-xl shadow-2xs border border-pl-border overflow-hidden">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 flex items-center justify-between">
+                        <h3 class="font-extrabold text-xs flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-pl-cyan"></span> Boys G2
                         </h3>
-                        <span class="text-[11px] text-slate-400">Swap to G1</span>
+                        <span class="text-[10px] text-purple-200">5 Teams</span>
                     </div>
-                    <div id="editor-boys-g2" class="p-3 sm:p-4 space-y-2.5"></div>
+                    <div id="editor-boys-g2" class="p-3 space-y-2"></div>
                 </div>
 
-                <!-- Girls Division Editor -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-                        <h3 class="font-bold text-xs sm:text-sm flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-                            Girls Division (6 Teams)
+                <!-- Girls -->
+                <div class="bg-white rounded-xl shadow-2xs border border-pl-border overflow-hidden">
+                    <div class="pl-gradient text-white px-3.5 py-2.5 flex items-center justify-between">
+                        <h3 class="font-extrabold text-xs flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-pl-pink"></span> Girls
                         </h3>
-                        <span class="text-[11px] text-slate-400">Single Group</span>
+                        <span class="text-[10px] text-purple-200">6 Teams</span>
                     </div>
-                    <div id="editor-girls" class="p-3 sm:p-4 space-y-2.5"></div>
-                </div>
-            </div>
-
-            <!-- Draw Actions Card -->
-            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h4 class="font-bold text-slate-900 text-sm">Randomize Groups & 2-Games-Per-Team Draw</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        Automatically pairs teams using a balanced cycle graph so every team plays exactly 2 games (1 Home, 1 Away).
-                    </p>
-                </div>
-                <div class="flex flex-wrap gap-2.5 shrink-0">
-                    <button onclick="randomizeBoysGroupsEntirely()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-2">
-                        <i class="fa-solid fa-dice"></i> Randomize Boys Groups
-                    </button>
-                    <button onclick="shuffleAndRedraw('girls')" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow-sm flex items-center gap-2">
-                        <i class="fa-solid fa-dice"></i> Randomize Girls Draw
-                    </button>
+                    <div id="editor-girls" class="p-3 space-y-2"></div>
                 </div>
             </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 mt-12 py-5 text-center text-xs text-slate-500 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p class="font-medium text-slate-700">
-                <i class="fa-solid fa-futbol text-emerald-600 mr-1"></i>
-                Tournament Manager • Hosted with Laravel & SQLite / MySQL
+    <footer class="bg-white border-t border-pl-border mt-8 py-4 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-1.5">
+            <p class="font-bold text-slate-800 flex items-center gap-1">
+                <i class="fa-solid fa-futbol text-pl-purple"></i>
+                Play it Forward • Tiyende Pamodzi Tournament
             </p>
-            <p>Public Live View & Admin PIN</p>
+            <p class="text-[11px] text-slate-400">Mobile Matchday Live Center</p>
         </div>
     </footer>
 
     <!-- ==================== MODAL: ADMIN PIN LOGIN ==================== -->
-    <div id="pin-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-base flex items-center gap-2">
-                    <i class="fa-solid fa-shield-halved text-amber-400"></i> Admin PIN Required
+    <div id="pin-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-pl-border overflow-hidden animate-scale-in">
+            <div class="pl-gradient text-white px-5 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm sm:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-pl-neon"></i> Admin Unlock
                 </h3>
-                <button onclick="closePinModal()" class="text-slate-400 hover:text-white">
+                <button onclick="closePinModal()" class="text-white/70 hover:text-white p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <form onsubmit="handlePinSubmit(event)" class="p-6 space-y-4">
-                <p class="text-xs text-slate-600">
-                    Enter the organizer PIN to unlock score entry and match controls.
+            <form onsubmit="handlePinSubmit(event)" class="p-5 space-y-4">
+                <p class="text-xs text-slate-600 font-medium">
+                    Enter organizer PIN to unlock score entry and match management.
                 </p>
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">Enter Admin PIN</label>
+                    <label class="block text-[11px] font-black uppercase text-slate-400 tracking-wider mb-1.5">Admin PIN</label>
                     <input type="password" id="admin-pin-input" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off"
-                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-center font-display font-bold text-2xl tracking-[0.5em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" />
-                    <p id="pin-error-msg" class="text-xs text-rose-600 font-semibold mt-1.5 hidden">
+                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-center font-display font-bold text-2xl tracking-[0.4em] text-slate-900 focus:outline-none focus:ring-2 focus:ring-pl-purple focus:bg-white" />
+                    <p id="pin-error-msg" class="text-xs text-rose-600 font-bold mt-1.5 hidden">
                         <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect PIN code.
                     </p>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex justify-end gap-2 pt-1">
                     <button type="button" onclick="closePinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
-                    <button type="submit" id="pin-submit-btn" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md flex items-center gap-1.5">
-                        <i class="fa-solid fa-unlock"></i> Unlock
+                    <button type="submit" id="pin-submit-btn" class="px-5 py-2.5 rounded-xl bg-pl-purple hover:bg-pl-dark text-white text-xs font-extrabold shadow-md flex items-center gap-1.5">
+                        <i class="fa-solid fa-unlock text-pl-neon"></i> Unlock
                     </button>
                 </div>
             </form>
@@ -632,97 +603,93 @@
     </div>
 
     <!-- ==================== MODAL: CHANGE ADMIN PIN ==================== -->
-    <div id="change-pin-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-base flex items-center gap-2">
-                    <i class="fa-solid fa-key text-amber-400"></i> Change Admin PIN
+    <div id="change-pin-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-pl-border overflow-hidden">
+            <div class="pl-gradient text-white px-5 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm sm:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-300"></i> Change PIN
                 </h3>
-                <button onclick="closeChangePinModal()" class="text-slate-400 hover:text-white">
+                <button onclick="closeChangePinModal()" class="text-white/70 hover:text-white p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <form onsubmit="handleChangePinSubmit(event)" class="p-6 space-y-4">
-                <p class="text-xs text-slate-600">Set a new 4 to 8 character PIN code.</p>
+            <form onsubmit="handleChangePinSubmit(event)" class="p-5 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">New PIN</label>
-                    <input type="text" id="new-admin-pin-input" inputmode="numeric" minlength="4" maxlength="8" placeholder="e.g. 2025" required
-                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-center font-display font-bold text-xl tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white" />
+                    <label class="block text-[11px] font-black uppercase text-slate-400 tracking-wider mb-1.5">New PIN (4-8 digits)</label>
+                    <input type="text" id="new-admin-pin-input" inputmode="numeric" minlength="4" maxlength="8" placeholder="e.g. 2026" required
+                        class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-center font-display font-bold text-xl tracking-widest text-slate-900 focus:outline-none focus:ring-2 focus:ring-pl-purple focus:bg-white" />
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeChangePinModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold">Save</button>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button type="button" onclick="closeChangePinModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Cancel</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-pl-purple text-white text-xs font-extrabold">Save</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- ==================== MODAL: ADD CUSTOM MATCH ==================== -->
-    <div id="custom-match-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
-                <h3 class="font-bold text-base flex items-center gap-2" id="custom-match-modal-title">
-                    <i class="fa-solid fa-plus-circle text-emerald-400"></i> Add Custom Match
+    <div id="custom-match-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-pl-border overflow-hidden">
+            <div class="pl-gradient text-white px-5 py-4 flex items-center justify-between">
+                <h3 class="font-black text-sm sm:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-pl-neon"></i> Add Match
                 </h3>
-                <button onclick="closeCustomMatchModal()" class="text-slate-400 hover:text-white">
+                <button onclick="closeCustomMatchModal()" class="text-white/70 hover:text-white p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div class="p-5 space-y-4">
+            <div class="p-5 space-y-3.5">
                 <div id="custom-match-group-wrapper">
-                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Select Group</label>
-                    <select id="custom-match-group" onchange="populateCustomMatchTeams()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium">
+                    <label class="block text-[11px] font-black uppercase text-slate-400 tracking-wider mb-1">Group</label>
+                    <select id="custom-match-group" onchange="populateCustomMatchTeams()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold">
                         <option value="G1">Boys Group 1</option>
                         <option value="G2">Boys Group 2</option>
                     </select>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Home Team</label>
-                        <select id="custom-match-home" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium"></select>
+                        <label class="block text-[11px] font-black uppercase text-slate-400 tracking-wider mb-1">Home Team</label>
+                        <select id="custom-match-home" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold"></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Away Team</label>
-                        <select id="custom-match-away" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium"></select>
+                        <label class="block text-[11px] font-black uppercase text-slate-400 tracking-wider mb-1">Away Team</label>
+                        <select id="custom-match-away" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold"></select>
                     </div>
                 </div>
-                <p id="custom-match-error" class="text-xs text-rose-600 font-medium hidden">Home and Away teams must be different.</p>
+                <p id="custom-match-error" class="text-xs text-rose-600 font-bold hidden">Home and Away teams must be different.</p>
                 <div class="flex justify-end gap-2 pt-2">
-                    <button onclick="closeCustomMatchModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
-                    <button onclick="saveCustomMatch()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">Add</button>
+                    <button onclick="closeCustomMatchModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Cancel</button>
+                    <button onclick="saveCustomMatch()" class="px-4 py-2 rounded-xl bg-pl-purple text-white text-xs font-extrabold">Add</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ==================== MODAL: CONFIRMATION ==================== -->
-    <div id="confirm-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="p-6">
-                <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 text-xl">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <h3 id="confirm-modal-title" class="text-lg font-bold text-slate-900">Reset Tournament Data?</h3>
-                <p id="confirm-modal-desc" class="text-sm text-slate-600 mt-1">
-                    This will restore default teams (Anthony, Mumba, etc.) and clear all entered scores in the server database.
-                </p>
-                <div class="flex justify-end gap-2.5 mt-6">
-                    <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
-                    <button id="confirm-modal-action-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Confirm Reset</button>
-                </div>
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-pl-border overflow-hidden p-5">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3 text-lg font-bold">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-base font-black text-slate-900">Reset Tournament?</h3>
+            <p class="text-xs text-slate-600 mt-1">
+                Restores original team rosters and clears all entered scores.
+            </p>
+            <div class="flex justify-end gap-2 mt-5">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Cancel</button>
+                <button id="confirm-modal-action-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black">Confirm</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none max-w-xs"></div>
+    <div id="toast-container" class="fixed bottom-4 right-4 left-4 sm:left-auto z-50 space-y-2 pointer-events-none max-w-xs sm:max-w-sm ml-auto"></div>
 
     <!-- ==================== APPLICATION JAVASCRIPT ==================== -->
     <script>
         const STORAGE_KEY = 'tournament_manager_v2_state';
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         
-        // Initial state pre-hydrated directly from Laravel Blade
         const INITIAL_SERVER_STATE = @json($initialState);
         let currentTab = 'boys';
         let currentCustomMatchDivision = 'boys';
@@ -737,13 +704,10 @@
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) return JSON.parse(saved);
-            } catch (e) {
-                console.error('Failed reading localStorage', e);
-            }
+            } catch (e) {}
             return null;
         }
 
-        // Save state to Laravel server database and local cache
         function saveState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -771,7 +735,6 @@
                     });
 
                     if (response.ok) {
-                        const data = await response.json();
                         setSyncBadge('synced');
                     } else if (response.status === 401 || response.status === 403) {
                         setSyncBadge('error');
@@ -781,16 +744,13 @@
                         setSyncBadge('warning');
                     }
                 } catch (err) {
-                    console.warn('Network sync error:', err);
                     setSyncBadge('warning');
                 }
             }, 300);
         }
 
-        // Background polling to keep public viewer screens automatically up to date
         async function fetchServerState() {
             if (isSyncing) return;
-            // Avoid interrupting an admin while typing in an input
             const activeEl = document.activeElement;
             const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT');
             if (isTyping && isAdmin) return;
@@ -825,17 +785,14 @@
             const badge = document.getElementById('sync-status-badge');
             if (!badge) return;
             if (status === 'synced') {
-                badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Server Live';
+                badge.className = 'hidden sm:flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-emerald-300 border border-emerald-400/30 items-center gap-1';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-pl-neon"></span> Live Sync';
             } else if (status === 'syncing') {
-                badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-300 border border-amber-500/30 flex items-center gap-1';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 live-dot"></span> Saving...';
-            } else if (status === 'warning') {
-                badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-600 flex items-center gap-1';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Offline Cache';
+                badge.className = 'hidden sm:flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 items-center gap-1';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 live-dot"></span> Saving';
             } else {
-                badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-950/80 text-rose-300 border border-rose-500/30 flex items-center gap-1';
-                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Auth Error';
+                badge.className = 'hidden sm:flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-slate-300 border border-white/20 items-center gap-1';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Cached';
             }
         }
 
@@ -844,14 +801,14 @@
             if (isAdmin) {
                 document.body.classList.add('is-admin');
                 if (badge) {
-                    badge.className = 'text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 flex items-center gap-1.5 shadow-xs';
-                    badge.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> Admin Unlocked';
+                    badge.className = 'text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 flex items-center gap-1 shadow-xs';
+                    badge.innerHTML = '<i class="fa-solid fa-unlock-keyhole text-[10px]"></i> Admin';
                 }
             } else {
                 document.body.classList.remove('is-admin');
                 if (badge) {
-                    badge.className = 'text-[11px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-900/70 text-slate-200 border border-white/15 flex items-center gap-1.5';
-                    badge.innerHTML = '<i class="fa-solid fa-eye text-emerald-400"></i> Public Live View';
+                    badge.className = 'text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-black/40 text-slate-200 border border-white/15 flex items-center gap-1';
+                    badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-pl-neon live-dot"></span> Public Live';
                 }
                 if (currentTab === 'teams') {
                     switchTab('boys');
@@ -868,7 +825,7 @@
             input.value = '';
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            setTimeout(() => input.focus(), 50);
+            setTimeout(() => input.focus(), 60);
         }
 
         function closePinModal() {
@@ -884,7 +841,7 @@
             if (!entered) return;
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
             try {
                 const response = await fetch('/api/tournament/verify-pin', {
@@ -906,13 +863,12 @@
                     sessionStorage.setItem('tournament_admin_pin', entered);
                     closePinModal();
                     updateAdminModeUI();
-                    showToast('Admin Mode unlocked! Scores will sync to server.');
+                    showToast('Admin Mode unlocked!');
                 } else {
                     document.getElementById('pin-error-msg').classList.remove('hidden');
                     document.getElementById('admin-pin-input').select();
                 }
             } catch (err) {
-                // Fallback to client-side verification if offline
                 if (entered === (state.adminPin || '1234')) {
                     isAdmin = true;
                     adminPinCached = entered;
@@ -926,7 +882,7 @@
                 }
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fa-solid fa-unlock"></i> Unlock';
+                submitBtn.innerHTML = '<i class="fa-solid fa-unlock text-pl-neon"></i> Unlock';
             }
         }
 
@@ -934,7 +890,7 @@
             isAdmin = false;
             sessionStorage.removeItem('tournament_admin_unlocked');
             updateAdminModeUI();
-            showToast('Switched to Public Read-Only View.');
+            showToast('Switched to Public View');
         }
 
         function openChangePinModal() {
@@ -944,7 +900,7 @@
             input.value = adminPinCached || '1234';
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            setTimeout(() => input.select(), 50);
+            setTimeout(() => input.select(), 60);
         }
 
         function closeChangePinModal() {
@@ -977,32 +933,32 @@
                     adminPinCached = newPin;
                     sessionStorage.setItem('tournament_admin_pin', newPin);
                     closeChangePinModal();
-                    showToast(`Admin PIN updated to "${newPin}" on server`);
+                    showToast(`Admin PIN updated`);
                 } else {
-                    showToast('Failed to update PIN on server', 'error');
+                    showToast('Failed to update PIN', 'error');
                 }
             } catch (err) {
                 state.adminPin = newPin;
                 adminPinCached = newPin;
                 closeChangePinModal();
-                showToast(`Admin PIN updated to "${newPin}"`);
+                showToast(`Admin PIN updated`);
             }
         }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-slate-900 border-emerald-500/40 text-white' : 'bg-rose-950 border-rose-500/40 text-white';
-            toast.className = `${bg} border px-4 py-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2.5 transition-all duration-300`;
+            const bg = type === 'success' ? 'bg-pl-purple border-pl-neon/40 text-white' : 'bg-rose-950 border-rose-500/40 text-white';
+            toast.className = `${bg} border px-3.5 py-2.5 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-2.5 transition-all duration-300`;
             toast.innerHTML = `
-                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-info text-amber-400'} text-sm shrink-0"></i>
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-pl-neon' : 'fa-circle-info text-amber-400'} text-sm shrink-0"></i>
                 <span class="leading-snug">${message}</span>
             `;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 2600);
+                setTimeout(() => toast.remove(), 250);
+            }, 2500);
         }
 
         function getTeamById(division, teamId) {
@@ -1063,31 +1019,31 @@
             tbody.innerHTML = standings.map((team, index) => {
                 const pos = index + 1;
                 const qualifies = pos <= qualifyCount;
-                const rowBg = qualifies ? 'bg-emerald-50/60 hover:bg-emerald-50/90' : 'hover:bg-slate-50';
-                const badgeClass = qualifies ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500';
+                const rowBorder = qualifies ? 'border-l-4 border-pl-neon bg-emerald-50/40' : 'border-l-4 border-transparent hover:bg-slate-50/80';
+                const posBadge = qualifies ? 'bg-pl-purple text-pl-neon font-black' : 'bg-slate-100 text-slate-500 font-bold';
                 const gdFormatted = team.GD > 0 ? `+${team.GD}` : `${team.GD}`;
-                const gdColor = team.GD > 0 ? 'text-emerald-600 font-bold' : (team.GD < 0 ? 'text-rose-500' : 'text-slate-500');
+                const gdColor = team.GD > 0 ? 'text-emerald-600 font-bold' : (team.GD < 0 ? 'text-rose-500' : 'text-slate-400');
 
                 return `
-                    <tr class="${rowBg} transition">
-                        <td class="py-2.5 pl-3 sm:pl-4 pr-1">
-                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg text-[11px] sm:text-xs font-display font-bold inline-flex items-center justify-center ${badgeClass}">
+                    <tr class="${rowBorder} transition">
+                        <td class="py-2 pl-2.5 sm:pl-3 pr-1">
+                            <span class="w-5 h-5 rounded-md text-[10px] font-display inline-flex items-center justify-center ${posBadge}">
                                 ${pos}
                             </span>
                         </td>
-                        <td class="py-2.5 px-2 font-semibold text-slate-900">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="truncate">${escapeHtml(team.name)}</span>
-                                ${qualifies ? `<span class="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">Q</span>` : ''}
+                        <td class="py-2 px-2 font-bold text-slate-900 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="truncate text-xs sm:text-sm">${escapeHtml(team.name)}</span>
+                                ${qualifies ? `<span class="text-[8px] font-black uppercase px-1 py-0.2 rounded bg-pl-neon text-pl-purple">Q</span>` : ''}
                             </div>
                         </td>
-                        <td class="py-2.5 px-1.5 text-center font-medium text-slate-600">${team.P}</td>
-                        <td class="py-2.5 px-1.5 text-center text-slate-600">${team.W}</td>
-                        <td class="py-2.5 px-1.5 text-center text-slate-600">${team.D}</td>
-                        <td class="py-2.5 px-1.5 text-center text-slate-600">${team.L}</td>
-                        <td class="py-2.5 px-1.5 text-center text-slate-500 text-[11px] hidden sm:table-cell">${team.GF}:${team.GA}</td>
-                        <td class="py-2.5 px-1.5 text-center text-[11px] ${gdColor}">${gdFormatted}</td>
-                        <td class="py-2.5 pl-1.5 pr-3 sm:pr-4 text-center font-display font-bold text-sm sm:text-base text-slate-900">${team.PTS}</td>
+                        <td class="py-2 px-1 text-center font-semibold text-slate-600 text-xs">${team.P}</td>
+                        <td class="py-2 px-1 text-center text-slate-600 text-xs">${team.W}</td>
+                        <td class="py-2 px-1 text-center text-slate-500 text-xs">${team.D}</td>
+                        <td class="py-2 px-1 text-center text-slate-500 text-xs">${team.L}</td>
+                        <td class="py-2 px-1 text-center text-slate-400 text-[10px] hidden sm:table-cell">${team.GF}:${team.GA}</td>
+                        <td class="py-2 px-1 text-center text-xs ${gdColor}">${gdFormatted}</td>
+                        <td class="py-2 pr-3 pl-1 text-center font-display font-extrabold text-xs sm:text-sm text-pl-purple">${team.PTS}</td>
                     </tr>
                 `;
             }).join('');
@@ -1119,57 +1075,57 @@
                 let statusBadge = '';
                 if (isAdmin) {
                     if (isDone) {
-                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800" title="Click status">FT</button>`;
+                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-pl-purple text-pl-neon" title="Click status">FT</button>`;
                     } else if (isLive) {
-                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800" title="Click status">LIVE</button>`;
+                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[9px] font-black px-1.5 py-0.5 rounded bg-pl-pink text-white" title="Click status">LIVE</button>`;
                     } else {
-                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600" title="Click status">M${idx + 1}</button>`;
+                        statusBadge = `<button onclick="cycleMatchStatus('${division}', '${m.id}')" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500" title="Click status">M${idx + 1}</button>`;
                     }
                 } else {
-                    if (isDone) statusBadge = `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">FT</span>`;
-                    else if (isLive) statusBadge = `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-amber-500 live-dot"></span>LIVE</span>`;
-                    else statusBadge = `<span class="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">M${idx + 1}</span>`;
+                    if (isDone) statusBadge = `<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-pl-purple text-pl-neon">FT</span>`;
+                    else if (isLive) statusBadge = `<span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-pl-pink text-white flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-white live-dot"></span>LIVE</span>`;
+                    else statusBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-400">M${idx + 1}</span>`;
                 }
 
                 let centerScoreHtml = '';
                 if (isAdmin) {
                     centerScoreHtml = `
                         <div class="flex items-center gap-1 shrink-0">
-                            <input type="number" min="0" max="99" placeholder="-" value="${hs}"
+                            <input type="number" min="0" max="99" placeholder="-" value="${hs}" inputmode="numeric"
                                 oninput="updateGroupMatchScore('${division}', '${m.id}', 'home', this.value)"
-                                class="score-input w-9 h-8 rounded border ${isDone ? 'bg-slate-50 border-slate-300' : 'bg-slate-100 border-slate-200'} text-center font-display font-bold text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
-                            <span class="text-[10px] font-bold text-slate-400">:</span>
-                            <input type="number" min="0" max="99" placeholder="-" value="${as}"
+                                class="score-input w-8 sm:w-9 h-7 sm:h-8 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-pl-purple" />
+                            <span class="text-[10px] font-black text-slate-300">:</span>
+                            <input type="number" min="0" max="99" placeholder="-" value="${as}" inputmode="numeric"
                                 oninput="updateGroupMatchScore('${division}', '${m.id}', 'away', this.value)"
-                                class="score-input w-9 h-8 rounded border ${isDone ? 'bg-slate-50 border-slate-300' : 'bg-slate-100 border-slate-200'} text-center font-display font-bold text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                                class="score-input w-8 sm:w-9 h-7 sm:h-8 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-pl-purple" />
                         </div>
                     `;
                 } else {
                     if (hasBothScores && (isDone || isLive)) {
                         centerScoreHtml = `
-                            <div class="px-2.5 py-0.5 rounded-lg ${isLive ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-white'} font-display font-bold text-xs tracking-wider flex items-center gap-1.5 shrink-0">
-                                <span>${hs}</span><span class="opacity-40">-</span><span>${as}</span>
+                            <div class="px-2 py-0.5 rounded-md ${isLive ? 'bg-pl-pink text-white' : 'bg-pl-purple text-white'} font-display font-black text-xs tracking-wider flex items-center gap-1 shrink-0 shadow-2xs">
+                                <span>${hs}</span><span class="text-white/40">-</span><span>${as}</span>
                             </div>
                         `;
                     } else {
-                        centerScoreHtml = `<div class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500 font-display font-bold text-[10px] uppercase tracking-wider shrink-0">VS</div>`;
+                        centerScoreHtml = `<div class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 font-display font-black text-[9px] uppercase tracking-wider shrink-0">VS</div>`;
                     }
                 }
 
                 return `
-                    <div class="bg-white rounded-xl p-2 border ${isDone ? 'border-emerald-200' : (isLive ? 'border-amber-300 shadow-xs' : 'border-slate-200')} flex items-center justify-between gap-2">
+                    <div class="bg-white rounded-lg p-2 border ${isDone ? 'border-purple-200' : (isLive ? 'border-pl-pink shadow-xs' : 'border-slate-200')} flex items-center justify-between gap-1.5 sm:gap-2">
                         <div class="flex items-center gap-1 min-w-0 flex-1 justify-end text-right">
-                            ${homeWon ? '<i class="fa-solid fa-caret-right text-emerald-600 text-[10px] shrink-0"></i>' : ''}
-                            <span class="text-xs truncate ${homeWon ? 'font-extrabold text-emerald-900' : 'font-semibold text-slate-800'}">${escapeHtml(home.name)}</span>
+                            ${homeWon ? '<i class="fa-solid fa-caret-right text-pl-neon text-[10px] shrink-0"></i>' : ''}
+                            <span class="text-xs truncate ${homeWon ? 'font-black text-pl-purple' : 'font-bold text-slate-800'}">${escapeHtml(home.name)}</span>
                         </div>
 
                         ${centerScoreHtml}
 
                         <div class="flex items-center justify-between gap-1 min-w-0 flex-1">
-                            <span class="text-xs truncate ${awayWon ? 'font-extrabold text-emerald-900' : 'font-semibold text-slate-800'}">${escapeHtml(away.name)}</span>
+                            <span class="text-xs truncate ${awayWon ? 'font-black text-pl-purple' : 'font-bold text-slate-800'}">${escapeHtml(away.name)}</span>
                             <div class="flex items-center gap-1 shrink-0 no-print">
                                 ${statusBadge}
-                                ${(isAdmin && matches.length > 3) ? `<button onclick="deleteGroupMatch('${division}', '${m.id}')" class="text-slate-300 hover:text-rose-500 text-xs px-1"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                                ${(isAdmin && matches.length > 3) ? `<button onclick="deleteGroupMatch('${division}', '${m.id}')" class="text-slate-300 hover:text-rose-500 text-xs px-0.5"><i class="fa-solid fa-trash-can"></i></button>` : ''}
                             </div>
                         </div>
                     </div>
@@ -1253,15 +1209,15 @@
 
             let sf1HomePlaceholder, sf1AwayPlaceholder, sf2HomePlaceholder, sf2AwayPlaceholder;
             if (division === 'boys') {
-                sf1HomePlaceholder = { id: null, name: 'TBD (1st G1)', tag: '1st G1' };
-                sf1AwayPlaceholder = { id: null, name: 'TBD (2nd G2)', tag: '2nd G2' };
-                sf2HomePlaceholder = { id: null, name: 'TBD (1st G2)', tag: '1st G2' };
-                sf2AwayPlaceholder = { id: null, name: 'TBD (2nd G1)', tag: '2nd G1' };
+                sf1HomePlaceholder = { id: null, name: '1st G1', tag: '1st G1' };
+                sf1AwayPlaceholder = { id: null, name: '2nd G2', tag: '2nd G2' };
+                sf2HomePlaceholder = { id: null, name: '1st G2', tag: '1st G2' };
+                sf2AwayPlaceholder = { id: null, name: '2nd G1', tag: '2nd G1' };
             } else {
-                sf1HomePlaceholder = { id: null, name: 'TBD (1st)', tag: '1st' };
-                sf1AwayPlaceholder = { id: null, name: 'TBD (4th)', tag: '4th' };
-                sf2HomePlaceholder = { id: null, name: 'TBD (2nd)', tag: '2nd' };
-                sf2AwayPlaceholder = { id: null, name: 'TBD (3rd)', tag: '3rd' };
+                sf1HomePlaceholder = { id: null, name: '1st Place', tag: '1st' };
+                sf1AwayPlaceholder = { id: null, name: '4th Place', tag: '4th' };
+                sf2HomePlaceholder = { id: null, name: '2nd Place', tag: '2nd' };
+                sf2AwayPlaceholder = { id: null, name: '3rd Place', tag: '3rd' };
             }
 
             const sf1Home = ko.sf1.customHomeId ? { ...getTeamById(division, ko.sf1.customHomeId), tag: sf1HomePlaceholder.tag } : sf1HomePlaceholder;
@@ -1272,32 +1228,26 @@
             const sf1Outcome = getKnockoutResult(ko.sf1, sf1Home, sf1Away);
             const sf2Outcome = getKnockoutResult(ko.sf2, sf2Home, sf2Away);
 
-            const thirdHome = ko.third.customHomeId ? { ...getTeamById(division, ko.third.customHomeId), tag: 'SF1' } : (sf1Outcome.loser ? { ...sf1Outcome.loser, tag: 'Loser SF1' } : { id: null, name: 'TBD (Loser SF1)', tag: 'SF1' });
-            const thirdAway = ko.third.customAwayId ? { ...getTeamById(division, ko.third.customAwayId), tag: 'SF2' } : (sf2Outcome.loser ? { ...sf2Outcome.loser, tag: 'Loser SF2' } : { id: null, name: 'TBD (Loser SF2)', tag: 'SF2' });
+            const thirdHome = ko.third.customHomeId ? { ...getTeamById(division, ko.third.customHomeId), tag: 'SF1' } : (sf1Outcome.loser ? { ...sf1Outcome.loser, tag: 'Loser SF1' } : { id: null, name: 'Loser SF1', tag: 'SF1' });
+            const thirdAway = ko.third.customAwayId ? { ...getTeamById(division, ko.third.customAwayId), tag: 'SF2' } : (sf2Outcome.loser ? { ...sf2Outcome.loser, tag: 'Loser SF2' } : { id: null, name: 'Loser SF2', tag: 'SF2' });
 
-            const finalHome = ko.final.customHomeId ? { ...getTeamById(division, ko.final.customHomeId), tag: 'SF1' } : (sf1Outcome.winner ? { ...sf1Outcome.winner, tag: 'Winner SF1' } : { id: null, name: 'TBD (Winner SF1)', tag: 'SF1' });
-            const finalAway = ko.final.customAwayId ? { ...getTeamById(division, ko.final.customAwayId), tag: 'SF2' } : (sf2Outcome.winner ? { ...sf2Outcome.winner, tag: 'Winner SF2' } : { id: null, name: 'TBD (Winner SF2)', tag: 'SF2' });
+            const finalHome = ko.final.customHomeId ? { ...getTeamById(division, ko.final.customHomeId), tag: 'SF1' } : (sf1Outcome.winner ? { ...sf1Outcome.winner, tag: 'Winner SF1' } : { id: null, name: 'Winner SF1', tag: 'SF1' });
+            const finalAway = ko.final.customAwayId ? { ...getTeamById(division, ko.final.customAwayId), tag: 'SF2' } : (sf2Outcome.winner ? { ...sf2Outcome.winner, tag: 'Winner SF2' } : { id: null, name: 'Winner SF2', tag: 'SF2' });
 
             container.innerHTML = `
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Semi-Finals</span>
-                    </div>
+                <div class="space-y-2">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Semi-Finals</span>
                     ${renderKnockoutCard(division, 'sf1', ko.sf1, sf1Home, sf1Away, allTeams, false)}
                     ${renderKnockoutCard(division, 'sf2', ko.sf2, sf2Home, sf2Away, allTeams, false)}
                 </div>
-                <div class="space-y-3 flex flex-col justify-center">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">3rd Place Playoff</span>
-                    </div>
+                <div class="space-y-2">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">3rd Place</span>
                     ${renderKnockoutCard(division, 'third', ko.third, thirdHome, thirdAway, allTeams, false)}
                 </div>
-                <div class="space-y-3 flex flex-col justify-center">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-600 flex items-center gap-1">
-                            <i class="fa-solid fa-crown"></i> Championship Final
-                        </span>
-                    </div>
+                <div class="space-y-2">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 flex items-center gap-1">
+                        <i class="fa-solid fa-trophy"></i> Championship Final
+                    </span>
                     ${renderKnockoutCard(division, 'final', ko.final, finalHome, finalAway, allTeams, true)}
                 </div>
             `;
@@ -1313,62 +1263,53 @@
             const homeIsWinner = outcome.winner && outcome.winner.id === homeTeam.id && homeTeam.id !== null;
             const awayIsWinner = outcome.winner && outcome.winner.id === awayTeam.id && awayTeam.id !== null;
 
-            const homeOptions = `<option value="">-- ${escapeHtml(homeTeam.id ? 'Reset TBD' : homeTeam.name)} --</option>` +
+            const homeOptions = `<option value="">-- ${escapeHtml(homeTeam.id ? 'Reset' : homeTeam.name)} --</option>` +
                 allTeams.map(t => `<option value="${t.id}" ${koMatch.customHomeId === t.id ? 'selected' : ''}>${escapeHtml(t.name)} (${t.group})</option>`).join('');
 
-            const awayOptions = `<option value="">-- ${escapeHtml(awayTeam.id ? 'Reset TBD' : awayTeam.name)} --</option>` +
+            const awayOptions = `<option value="">-- ${escapeHtml(awayTeam.id ? 'Reset' : awayTeam.name)} --</option>` +
                 allTeams.map(t => `<option value="${t.id}" ${koMatch.customAwayId === t.id ? 'selected' : ''}>${escapeHtml(t.name)} (${t.group})</option>`).join('');
 
             const homeTeamNameDisplay = isAdmin
-                ? `<select onchange="updateKnockoutTeam('${division}', '${stageKey}', 'customHomeId', this.value)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-800">${homeOptions}</select>`
-                : `<span class="text-xs sm:text-sm truncate ${homeIsWinner ? 'font-extrabold text-emerald-700' : (homeTeam.id ? 'font-semibold text-slate-800' : 'font-medium italic text-slate-400')}">${escapeHtml(homeTeam.name)}</span>`;
+                ? `<select onchange="updateKnockoutTeam('${division}', '${stageKey}', 'customHomeId', this.value)" class="w-full rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs font-bold text-slate-800">${homeOptions}</select>`
+                : `<span class="text-xs truncate ${homeIsWinner ? 'font-black text-pl-purple' : (homeTeam.id ? 'font-bold text-slate-800' : 'font-medium italic text-slate-400')}">${escapeHtml(homeTeam.name)}</span>`;
 
             const awayTeamNameDisplay = isAdmin
-                ? `<select onchange="updateKnockoutTeam('${division}', '${stageKey}', 'customAwayId', this.value)" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-800">${awayOptions}</select>`
-                : `<span class="text-xs sm:text-sm truncate ${awayIsWinner ? 'font-extrabold text-emerald-700' : (awayTeam.id ? 'font-semibold text-slate-800' : 'font-medium italic text-slate-400')}">${escapeHtml(awayTeam.name)}</span>`;
+                ? `<select onchange="updateKnockoutTeam('${division}', '${stageKey}', 'customAwayId', this.value)" class="w-full rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs font-bold text-slate-800">${awayOptions}</select>`
+                : `<span class="text-xs truncate ${awayIsWinner ? 'font-black text-pl-purple' : (awayTeam.id ? 'font-bold text-slate-800' : 'font-medium italic text-slate-400')}">${escapeHtml(awayTeam.name)}</span>`;
 
             const homeScoreControl = isAdmin
-                ? `<input type="number" min="0" max="99" placeholder="-" value="${hs}" oninput="updateKnockoutScore('${division}', '${stageKey}', 'homeScore', this.value)" class="score-input w-10 h-8 rounded border border-slate-300 bg-slate-50 text-center font-display font-bold text-sm shrink-0" />`
-                : `<span class="w-8 h-8 rounded ${homeIsWinner ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-800'} font-display font-bold text-xs inline-flex items-center justify-center shrink-0">${hs !== '' ? hs : '-'}</span>`;
+                ? `<input type="number" min="0" max="99" placeholder="-" value="${hs}" inputmode="numeric" oninput="updateKnockoutScore('${division}', '${stageKey}', 'homeScore', this.value)" class="score-input w-8 h-7 rounded border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs shrink-0" />`
+                : `<span class="w-7 h-7 rounded ${homeIsWinner ? 'bg-pl-purple text-pl-neon font-black' : 'bg-slate-100 text-slate-700 font-bold'} font-display text-xs inline-flex items-center justify-center shrink-0">${hs !== '' ? hs : '-'}</span>`;
 
             const awayScoreControl = isAdmin
-                ? `<input type="number" min="0" max="99" placeholder="-" value="${as}" oninput="updateKnockoutScore('${division}', '${stageKey}', 'awayScore', this.value)" class="score-input w-10 h-8 rounded border border-slate-300 bg-slate-50 text-center font-display font-bold text-sm shrink-0" />`
-                : `<span class="w-8 h-8 rounded ${awayIsWinner ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-800'} font-display font-bold text-xs inline-flex items-center justify-center shrink-0">${as !== '' ? as : '-'}</span>`;
+                ? `<input type="number" min="0" max="99" placeholder="-" value="${as}" inputmode="numeric" oninput="updateKnockoutScore('${division}', '${stageKey}', 'awayScore', this.value)" class="score-input w-8 h-7 rounded border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs shrink-0" />`
+                : `<span class="w-7 h-7 rounded ${awayIsWinner ? 'bg-pl-purple text-pl-neon font-black' : 'bg-slate-100 text-slate-700 font-bold'} font-display text-xs inline-flex items-center justify-center shrink-0">${as !== '' ? as : '-'}</span>`;
 
             return `
-                <div class="rounded-xl p-3 border ${isFinal ? 'bg-gradient-to-b from-amber-50/80 to-white border-amber-300 shadow-sm' : 'bg-white border-slate-200 shadow-2xs'} space-y-2.5">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                        <div>
-                            <span class="text-[11px] font-extrabold ${isFinal ? 'text-amber-800' : 'text-slate-800'}">${koMatch.label}</span>
-                            <span class="block text-[10px] text-slate-400">${koMatch.sublabel}</span>
-                        </div>
-                        ${outcome.winner ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isFinal ? 'bg-amber-400 text-slate-950' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(outcome.winner.name)}</span>` : ''}
+                <div class="rounded-xl p-2.5 border ${isFinal ? 'bg-gradient-to-b from-amber-50 to-white border-amber-300 shadow-xs' : 'bg-white border-slate-200 shadow-2xs'} space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-1">
+                        <span class="text-[10px] font-black uppercase ${isFinal ? 'text-amber-800' : 'text-slate-700'}">${koMatch.label}</span>
+                        ${outcome.winner ? `<span class="text-[9px] font-black px-1.5 py-0.2 rounded ${isFinal ? 'bg-amber-400 text-slate-950' : 'bg-pl-purple text-pl-neon'}">${escapeHtml(outcome.winner.name)}</span>` : ''}
                     </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                            <span class="text-[9px] font-bold px-1 py-0.2 rounded bg-slate-100 text-slate-600 shrink-0">${homeTeam.tag || 'Seed'}</span>
-                            <div class="min-w-0 flex-1">${homeTeamNameDisplay}</div>
-                        </div>
+                    <div class="flex items-center justify-between gap-1.5">
+                        <div class="min-w-0 flex-1">${homeTeamNameDisplay}</div>
                         ${homeScoreControl}
                     </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 min-w-0 flex-1">
-                            <span class="text-[9px] font-bold px-1 py-0.2 rounded bg-slate-100 text-slate-600 shrink-0">${awayTeam.tag || 'Seed'}</span>
-                            <div class="min-w-0 flex-1">${awayTeamNameDisplay}</div>
-                        </div>
+                    <div class="flex items-center justify-between gap-1.5">
+                        <div class="min-w-0 flex-1">${awayTeamNameDisplay}</div>
                         ${awayScoreControl}
                     </div>
                     ${outcome.isDraw ? (
                         isAdmin ? `
-                        <div class="pt-1.5 border-t border-amber-200 bg-amber-50 -mx-3 -mb-3 p-2.5 rounded-b-xl flex items-center justify-between gap-2 text-xs">
-                            <span class="font-bold text-amber-900 text-[11px]">Penalties (PSO):</span>
+                        <div class="pt-1 border-t border-amber-200 bg-amber-50/70 -mx-2.5 -mb-2.5 p-2 rounded-b-xl flex items-center justify-between text-xs">
+                            <span class="font-bold text-amber-900 text-[10px]">Penalties:</span>
                             <div class="flex items-center gap-1">
-                                <input type="number" min="0" max="99" placeholder="H" value="${hp}" oninput="updateKnockoutScore('${division}', '${stageKey}', 'homePen', this.value)" class="score-input w-9 h-7 rounded border border-amber-300 bg-white text-center font-bold text-xs" />
+                                <input type="number" min="0" max="99" placeholder="H" value="${hp}" inputmode="numeric" oninput="updateKnockoutScore('${division}', '${stageKey}', 'homePen', this.value)" class="score-input w-7 h-6 rounded border border-amber-300 bg-white text-center font-bold text-xs" />
                                 <span class="text-amber-700">-</span>
-                                <input type="number" min="0" max="99" placeholder="A" value="${ap}" oninput="updateKnockoutScore('${division}', '${stageKey}', 'awayPen', this.value)" class="score-input w-9 h-7 rounded border border-amber-300 bg-white text-center font-bold text-xs" />
+                                <input type="number" min="0" max="99" placeholder="A" value="${ap}" inputmode="numeric" oninput="updateKnockoutScore('${division}', '${stageKey}', 'awayPen', this.value)" class="score-input w-7 h-6 rounded border border-amber-300 bg-white text-center font-bold text-xs" />
                             </div>
                         </div>` : `
-                        <div class="pt-1.5 border-t border-amber-200 bg-amber-50 -mx-3 -mb-3 px-3 py-1.5 rounded-b-xl flex items-center justify-between text-[11px] text-amber-900 font-bold">
+                        <div class="pt-1 border-t border-amber-200 bg-amber-50/70 -mx-2.5 -mb-2.5 px-2 py-1 rounded-b-xl flex items-center justify-between text-[10px] text-amber-900 font-bold">
                             <span>Penalties (PSO)</span>
                             <span>${hp !== '' && ap !== '' ? `${hp} - ${ap}` : 'Tied'}</span>
                         </div>`
@@ -1395,14 +1336,14 @@
                 state.boysKnockout.sf1.customAwayId = g2[1]?.id || null;
                 state.boysKnockout.sf2.customHomeId = g2[0]?.id || null;
                 state.boysKnockout.sf2.customAwayId = g1[1]?.id || null;
-                showToast('Boys Semi-Finals seeded from standings!');
+                showToast('Boys Semi-Finals seeded');
             } else {
                 const table = calculateStandings('girls', 'G1');
                 state.girlsKnockout.sf1.customHomeId = table[0]?.id || null;
                 state.girlsKnockout.sf1.customAwayId = table[3]?.id || null;
                 state.girlsKnockout.sf2.customHomeId = table[1]?.id || null;
                 state.girlsKnockout.sf2.customAwayId = table[2]?.id || null;
-                showToast('Girls Semi-Finals seeded with Top 4!');
+                showToast('Girls Semi-Finals seeded');
             }
             saveState();
             renderKnockoutStage(division);
@@ -1418,7 +1359,7 @@
             saveState();
             renderKnockoutStage(division);
             updateHeaderProgressAndChampions();
-            showToast('Knockout bracket reset');
+            showToast('Knockouts reset');
         }
 
         function updateKnockoutScore(division, stageKey, field, value) {
@@ -1466,16 +1407,16 @@
             if (boysChamp || girlsChamp) {
                 banner.classList.remove('hidden');
                 banner.innerHTML = `
-                    <div class="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-slate-950 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-11 h-11 rounded-xl bg-slate-950 text-amber-400 flex items-center justify-center text-xl shrink-0">
+                    <div class="pl-neon-gradient text-pl-purple rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-pl-purple text-pl-neon flex items-center justify-center text-lg shrink-0">
                                 <i class="fa-solid fa-trophy"></i>
                             </div>
                             <div>
-                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-900/80">Champions Crowned</span>
-                                <div class="flex flex-wrap items-center gap-3 mt-0.5">
-                                    ${boysChamp ? `<span class="text-sm sm:text-base font-extrabold">🏆 Boys: ${escapeHtml(boysChamp.name)}</span>` : ''}
-                                    ${girlsChamp ? `<span class="text-sm sm:text-base font-extrabold">👑 Girls: ${escapeHtml(girlsChamp.name)}</span>` : ''}
+                                <span class="text-[9px] font-black uppercase tracking-widest text-pl-purple/80">Champions</span>
+                                <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                                    ${boysChamp ? `<span class="text-xs sm:text-sm font-black">🏆 Boys: ${escapeHtml(boysChamp.name)}</span>` : ''}
+                                    ${girlsChamp ? `<span class="text-xs sm:text-sm font-black">👑 Girls: ${escapeHtml(girlsChamp.name)}</span>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -1502,9 +1443,9 @@
             const divFilter = document.getElementById('schedule-filter-division').value;
             const statusFilter = document.getElementById('schedule-filter-status').value;
 
-            const g1 = state.boysMatches.filter(m => m.group === 'G1').map((m, i) => ({ ...m, label: `Boys Group 1 (Match #${i + 1})`, badgeColor: 'bg-emerald-500/10 text-emerald-800 border-emerald-200' }));
-            const g2 = state.boysMatches.filter(m => m.group === 'G2').map((m, i) => ({ ...m, label: `Boys Group 2 (Match #${i + 1})`, badgeColor: 'bg-blue-500/10 text-blue-800 border-blue-200' }));
-            const girls = state.girlsMatches.map((m, i) => ({ ...m, label: `Girls League (Match #${i + 1})`, badgeColor: 'bg-purple-500/10 text-purple-800 border-purple-200' }));
+            const g1 = state.boysMatches.filter(m => m.group === 'G1').map((m, i) => ({ ...m, label: `Boys G1 (#${i + 1})`, badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-200' }));
+            const g2 = state.boysMatches.filter(m => m.group === 'G2').map((m, i) => ({ ...m, label: `Boys G2 (#${i + 1})`, badgeColor: 'bg-blue-50 text-blue-800 border-blue-200' }));
+            const girls = state.girlsMatches.map((m, i) => ({ ...m, label: `Girls (#${i + 1})`, badgeColor: 'bg-purple-50 text-purple-800 border-purple-200' }));
 
             const combined = [];
             const maxLen = Math.max(g1.length, g2.length, girls.length);
@@ -1521,7 +1462,7 @@
             });
 
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-2 bg-white rounded-2xl p-8 text-center text-slate-500 text-sm border border-slate-200">No matches found for this filter.</div>`;
+                container.innerHTML = `<div class="col-span-2 bg-white rounded-xl p-6 text-center text-slate-400 text-xs border border-slate-200">No matches found.</div>`;
                 return;
             }
 
@@ -1533,42 +1474,42 @@
                 const hasScores = hs !== '' && as !== '';
 
                 const statusBadge = isAdmin
-                    ? `<button onclick="cycleMatchStatus('${m.division}', '${m.id}')" class="text-xs font-bold px-2.5 py-1 rounded-lg ${m.status === 'completed' ? 'bg-emerald-600 text-white' : (m.status === 'live' ? 'bg-amber-500 text-slate-950' : 'bg-slate-100 text-slate-700')}">
+                    ? `<button onclick="cycleMatchStatus('${m.division}', '${m.id}')" class="text-[10px] font-black px-2 py-0.5 rounded ${m.status === 'completed' ? 'bg-pl-purple text-pl-neon' : (m.status === 'live' ? 'bg-pl-pink text-white' : 'bg-slate-100 text-slate-600')}">
                         ${m.status === 'completed' ? 'FT' : (m.status === 'live' ? 'LIVE' : 'Upcoming')}
                        </button>`
-                    : `<span class="text-xs font-bold px-2.5 py-1 rounded-lg ${m.status === 'completed' ? 'bg-emerald-100 text-emerald-800' : (m.status === 'live' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600')}">
-                        ${m.status === 'completed' ? 'Full Time' : (m.status === 'live' ? 'LIVE' : 'Upcoming')}
+                    : `<span class="text-[10px] font-black px-2 py-0.5 rounded ${m.status === 'completed' ? 'bg-pl-purple text-pl-neon' : (m.status === 'live' ? 'bg-pl-pink text-white' : 'bg-slate-100 text-slate-500')}">
+                        ${m.status === 'completed' ? 'FT' : (m.status === 'live' ? 'LIVE' : 'Upcoming')}
                        </span>`;
 
                 const centerScoreControl = isAdmin
                     ? `<div class="flex items-center gap-1">
-                        <input type="number" min="0" max="99" placeholder="-" value="${hs}" oninput="updateGroupMatchScore('${m.division}', '${m.id}', 'home', this.value)" class="score-input w-10 h-9 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-sm" />
-                        <span class="text-slate-400 font-bold">:</span>
-                        <input type="number" min="0" max="99" placeholder="-" value="${as}" oninput="updateGroupMatchScore('${m.division}', '${m.id}', 'away', this.value)" class="score-input w-10 h-9 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-sm" />
+                        <input type="number" min="0" max="99" placeholder="-" value="${hs}" inputmode="numeric" oninput="updateGroupMatchScore('${m.division}', '${m.id}', 'home', this.value)" class="score-input w-8 h-8 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs" />
+                        <span class="text-slate-300 font-bold">:</span>
+                        <input type="number" min="0" max="99" placeholder="-" value="${as}" inputmode="numeric" oninput="updateGroupMatchScore('${m.division}', '${m.id}', 'away', this.value)" class="score-input w-8 h-8 rounded-lg border border-slate-300 bg-slate-50 text-center font-display font-bold text-xs" />
                        </div>`
                     : (hasScores && (m.status === 'completed' || m.status === 'live')
-                        ? `<div class="px-3 py-1 rounded-xl bg-slate-900 text-white font-display font-bold text-sm tracking-wider">${hs} - ${as}</div>`
-                        : `<div class="px-2.5 py-1 rounded-xl bg-slate-100 text-slate-500 font-display font-bold text-xs">VS</div>`);
+                        ? `<div class="px-2.5 py-0.5 rounded-md bg-pl-purple text-white font-display font-black text-xs">${hs} - ${as}</div>`
+                        : `<div class="px-2 py-0.5 rounded bg-slate-100 text-slate-400 font-display font-black text-[10px]">VS</div>`);
 
                 return `
-                    <div class="bg-white rounded-2xl p-4 shadow-xs border border-slate-200/90 hover:shadow-md transition flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-3 min-w-0 flex-1">
-                            <div class="w-9 h-9 rounded-xl bg-slate-900 text-emerald-400 font-display font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
-                                #${idx + 1}
+                    <div class="bg-white rounded-xl p-3 shadow-2xs border border-pl-border flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-7 h-7 rounded-lg bg-pl-purple text-pl-neon font-display font-black text-xs flex items-center justify-center shrink-0">
+                                ${idx + 1}
                             </div>
                             <div class="min-w-0 flex-1">
-                                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border ${m.badgeColor} inline-block mb-1">
+                                <span class="text-[9px] font-black uppercase px-1.5 py-0.2 rounded border ${m.badgeColor} inline-block">
                                     ${m.label}
                                 </span>
-                                <div class="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900 truncate">
+                                <div class="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 truncate mt-0.5">
                                     <span class="truncate">${escapeHtml(home.name)}</span>
-                                    <span class="text-xs text-slate-400 font-normal">vs</span>
+                                    <span class="text-[10px] text-slate-300">vs</span>
                                     <span class="truncate">${escapeHtml(away.name)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3 shrink-0">
+                        <div class="flex items-center gap-2 shrink-0">
                             ${centerScoreControl}
                             ${statusBadge}
                         </div>
@@ -1582,9 +1523,9 @@
             const originalBody = document.body.innerHTML;
 
             document.body.innerHTML = `
-                <div style="font-family: Inter, sans-serif; padding: 20px; color: #0f172a;">
-                    <h1 style="font-size: 22px; font-weight: 800; margin-bottom: 4px;">Official Master Pitch Schedule</h1>
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Boys & Girls Tournament Manager</p>
+                <div style="font-family: Outfit, sans-serif; padding: 20px; color: #1a001f;">
+                    <h1 style="font-size: 20px; font-weight: 900; margin-bottom: 2px;">Play it Forward — Tiyende Pamodzi Tournament</h1>
+                    <p style="font-size: 11px; color: #666; margin-bottom: 16px;">Official Master Pitch Schedule</p>
                     ${printArea}
                 </div>
             `;
@@ -1600,25 +1541,25 @@
             if (!g1 || !g2 || !girls) return;
 
             g1.innerHTML = state.boysTeams.filter(t => t.group === 'G1').map((t, i) => `
-                <div class="flex items-center gap-2">
-                    <span class="w-5 text-xs font-bold text-slate-400">${i + 1}.</span>
-                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('boys', '${t.id}', this.value)" class="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-800" />
-                    <button onclick="moveBoysTeamGroup('${t.id}', 'G2')" class="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-600 text-xs font-semibold" title="Move to G2">G2</button>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-4 text-xs font-bold text-slate-400">${i + 1}.</span>
+                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('boys', '${t.id}', this.value)" class="flex-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-800" />
+                    <button onclick="moveBoysTeamGroup('${t.id}', 'G2')" class="px-2 py-1 rounded bg-slate-100 hover:bg-blue-100 text-slate-600 text-[10px] font-bold">G2</button>
                 </div>
             `).join('');
 
             g2.innerHTML = state.boysTeams.filter(t => t.group === 'G2').map((t, i) => `
-                <div class="flex items-center gap-2">
-                    <span class="w-5 text-xs font-bold text-slate-400">${i + 6}.</span>
-                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('boys', '${t.id}', this.value)" class="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-800" />
-                    <button onclick="moveBoysTeamGroup('${t.id}', 'G1')" class="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-100 text-slate-600 text-xs font-semibold" title="Move to G1">G1</button>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-4 text-xs font-bold text-slate-400">${i + 6}.</span>
+                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('boys', '${t.id}', this.value)" class="flex-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-800" />
+                    <button onclick="moveBoysTeamGroup('${t.id}', 'G1')" class="px-2 py-1 rounded bg-slate-100 hover:bg-purple-100 text-slate-600 text-[10px] font-bold">G1</button>
                 </div>
             `).join('');
 
             girls.innerHTML = state.girlsTeams.map((t, i) => `
-                <div class="flex items-center gap-2">
-                    <span class="w-5 text-xs font-bold text-slate-400">${i + 1}.</span>
-                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('girls', '${t.id}', this.value)" class="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-800" />
+                <div class="flex items-center gap-1.5">
+                    <span class="w-4 text-xs font-bold text-slate-400">${i + 1}.</span>
+                    <input type="text" value="${escapeHtml(t.name)}" onchange="renameTeam('girls', '${t.id}', this.value)" class="flex-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-800" />
                 </div>
             `).join('');
         }
@@ -1649,7 +1590,7 @@
             ];
             saveState();
             renderAll();
-            showToast(`Moved to ${targetGroup === 'G1' ? 'Group 1' : 'Group 2'}`);
+            showToast(`Moved to ${targetGroup}`);
         }
 
         function generateTwoGamesPerTeamFixtures(teamIds, division, group) {
@@ -1687,10 +1628,10 @@
                     ...generateTwoGamesPerTeamFixtures(shuffleArray(state.boysTeams.filter(t => t.group === 'G1').map(t => t.id)), 'boys', 'G1'),
                     ...generateTwoGamesPerTeamFixtures(shuffleArray(state.boysTeams.filter(t => t.group === 'G2').map(t => t.id)), 'boys', 'G2')
                 ];
-                showToast('Boys fixtures redrawn');
+                showToast('Boys draw redrawn');
             } else {
                 state.girlsMatches = generateTwoGamesPerTeamFixtures(shuffleArray(state.girlsTeams.map(t => t.id)), 'girls', 'G1');
-                showToast('Girls fixtures redrawn');
+                showToast('Girls draw redrawn');
             }
             saveState();
             renderAll();
@@ -1705,7 +1646,7 @@
             ];
             saveState();
             renderAll();
-            showToast('Boys teams randomly regrouped');
+            showToast('Boys regrouped');
         }
 
         function clearAllScoresOnly() {
@@ -1789,7 +1730,7 @@
                     saveState();
                     renderAll();
                     closeConfirmModal();
-                    showToast('Tournament reset to defaults');
+                    showToast('Tournament reset');
                 };
             }
             modal.classList.remove('hidden');
@@ -1813,10 +1754,10 @@
                 if (!sec || !btn) return;
                 if (t === tabName) {
                     sec.classList.remove('hidden');
-                    btn.className = `${t === 'teams' ? 'admin-only ' : ''}tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 shrink-0`;
+                    btn.className = `${t === 'teams' ? 'admin-only ' : ''}tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-extrabold text-xs sm:text-sm transition whitespace-nowrap bg-pl-neon text-pl-purple shadow-md shadow-pl-neon/20 shrink-0`;
                 } else {
                     sec.classList.add('hidden');
-                    btn.className = `${t === 'teams' ? 'admin-only ' : ''}tab-btn flex items-center gap-2 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition whitespace-nowrap text-emerald-100 hover:bg-white/10 shrink-0`;
+                    btn.className = `${t === 'teams' ? 'admin-only ' : ''}tab-btn flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-bold text-xs sm:text-sm transition whitespace-nowrap text-purple-200 hover:bg-white/10 shrink-0`;
                 }
             });
             renderAll();
@@ -1846,10 +1787,8 @@
 
         window.onload = function () {
             updateAdminModeUI();
-            // Start periodic polling every 4 seconds to sync live scores across all devices
-            setInterval(fetchServerState, 4000);
+            setInterval(fetchServerState, 3500);
         };
     </script>
 </body>
 </html>
-

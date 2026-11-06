@@ -36,7 +36,7 @@ class Tournament extends Model
             return static::firstOrCreate(
                 ['slug' => 'default'],
                 [
-                    'title' => 'Boys & Girls Knockout Cup',
+                    'title' => 'Play it Forward — Tiyende Pamodzi Tournament',
                     'admin_pin' => '1234',
                     'state' => static::defaultState(),
                 ]
@@ -46,7 +46,7 @@ class Tournament extends Model
 
             $fallback = new static([
                 'slug' => 'default',
-                'title' => 'Boys & Girls Knockout Cup',
+                'title' => 'Play it Forward — Tiyende Pamodzi Tournament',
                 'admin_pin' => '1234',
                 'state' => static::defaultState(),
             ]);
