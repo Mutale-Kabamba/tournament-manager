@@ -620,9 +620,6 @@
                     <p id="pin-error-msg" class="text-xs text-rose-600 font-semibold mt-1.5 hidden">
                         <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect PIN code.
                     </p>
-                    <p id="default-pin-hint" class="text-[11px] text-slate-400 mt-1.5 text-center">
-                        Default PIN: <strong class="text-slate-600 font-mono">1234</strong>
-                    </p>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closePinModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Cancel</button>
